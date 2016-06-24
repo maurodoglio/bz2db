@@ -63,7 +63,7 @@ def fetch_bugs(**kwargs):
     return response.json()['bugs']
 
 
-def fetch_paginated_endpoint(fetch_func, page_size=2000, max_pages=5, **kwargs):
+def fetch_paginated_endpoint(fetch_func, page_size=2000, max_pages=50, **kwargs):
     offset = 0
     data = []
 
