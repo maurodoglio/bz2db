@@ -39,9 +39,10 @@ release_dates = {
 release_trains = {}
 for r_date, r_version in release_dates.items():
     release_trains[r_date] = {
-        r_version: 'release',
-        r_version + 1: 'beta',
-        r_version + 2: 'aurora'
+        'release': r_version,
+        'beta': r_version + 1,
+        'aurora': r_version + 2,
+        'nightly': r_version + 3
     }
 
 
@@ -63,7 +64,8 @@ def fetch_bugs(**kwargs):
     return response.json()['bugs']
 
 
-def fetch_paginated_endpoint(fetch_func, page_size=2000, max_pages=50, **kwargs):
+def fetch_paginated_endpoint(fetch_func, page_size=2000,
+                             max_pages=50, **kwargs):
     offset = 0
     data = []
 
@@ -82,11 +84,11 @@ def fetch_paginated_endpoint(fetch_func, page_size=2000, max_pages=50, **kwargs)
     return data
 
 
-def get_release_cycle(release_date):
+def get_discovery_release_cycle(release_date):
 
     assert isinstance(release_date, date)
 
-    for d in sorted(release_dates.keys(), reverse=True):
+    for d in sorted(release_trains.keys(), reverse=True):
         if d <= release_date:
             return d, release_dates[d]
 
@@ -94,16 +96,16 @@ def get_release_cycle(release_date):
 
 
 def get_release_channel(release_date, release_cycle):
-    if release_cycle < min(release_trains[release_date].keys()):
+    if release_cycle < min(release_trains[release_date].values()):
         return 'old release'
-    elif release_cycle > max(release_trains[release_date].keys()):
+    elif release_cycle > max(release_trains[release_date].values()):
         return 'nightly'
-    try:
-        return release_trains[release_date][release_cycle]
-    except KeyError:
-        print 'error retrieving channel for %s in %s' % (
-            release_cycle, release_trains[release_date])
-        return 'error'
+    for channel, cycle in release_trains[release_date].items():
+        if release_cycle == cycle:
+            return channel
+    print 'error retrieving channel for %s in %s' % (
+        release_cycle, release_trains[release_date])
+    return 'error'
 
 
 def join_keywords(bug):
@@ -113,21 +115,30 @@ def join_keywords(bug):
 def add_release_cycle_and_channel(bug):
     creation_time = datetime.strptime(bug['creation_time'][0:10],
                                       '%Y-%m-%d').date()
-    release_date, bug['release_cycle'] = get_release_cycle(creation_time)
+    release_date, release_cycle = get_discovery_release_cycle(
+        creation_time
+    )
 
     branch = bug['version'].lower()
+    release_channel = 'unknown'
 
     if branch == 'trunk':
-        bug['release_channel'] = 'nightly'
+        release_channel = 'nightly'
     elif branch == 'unspecified':
-        bug['release_channel'] = branch
+        release_channel = branch
     else:
         match = branch_re.match(branch)
         if match:
-            bug['release_channel'] = get_release_channel(release_date,
-                                                         int(match.group(1)))
-        else:
-            bug['release_channel'] = 'unknown'
+            release_channel = get_release_channel(release_date,
+                                                  int(match.group(1)))
+    try:
+        bug['release_cycle'] = release_trains[release_date][release_channel]
+    except KeyError:
+        # If we don't know which version it refers to assign it to the
+        # current release
+        bug['release_cycle'] = release_cycle
+
+    bug['release_channel'] = release_channel
 
 
 def update_bug_db(bugs, cf_fields):
