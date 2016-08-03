@@ -129,16 +129,20 @@ def add_release_cycle_and_channel(bug):
     else:
         match = branch_re.match(branch)
         if match:
-            release_channel = get_release_channel(release_date,
-                                                  int(match.group(1)))
-    try:
-        bug['release_cycle'] = release_trains[release_date][release_channel]
-    except KeyError:
-        # If we don't know which version it refers to assign it to the
-        # current release
+            release_cycle = int(match.group(1))
+            release_channel = get_release_channel(release_date, release_cycle)
+    if release_channel == 'old release':
         bug['release_cycle'] = release_cycle
+        bug['release_channel'] = 'release'
+    else:
+        try:
+            bug['release_cycle'] = release_trains[release_date][release_channel]
+        except KeyError:
+            # If we don't know which version it refers to assign it to the
+            # current release
+            bug['release_cycle'] = release_cycle
 
-    bug['release_channel'] = release_channel
+        bug['release_channel'] = release_channel
 
 
 def update_bug_db(bugs, cf_fields):

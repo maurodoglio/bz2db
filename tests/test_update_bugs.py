@@ -45,6 +45,7 @@ def test_add_release_cycle_and_channel():
     bug2 = dict(version='47 branch', creation_time='2016-06-06')
     bug3 = dict(version='48 branch', creation_time='2016-06-06')
     bug4 = dict(version='trunk', creation_time='2016-06-06')
+    bug5 = dict(version='40 branch', creation_time='2016-06-06')
 
     add_release_cycle_and_channel(bug1)
     assert bug1['release_channel'] == 'unknown'
@@ -61,3 +62,7 @@ def test_add_release_cycle_and_channel():
     add_release_cycle_and_channel(bug4)
     assert bug4['release_channel'] == 'nightly'
     assert bug4['release_cycle'] == 49
+
+    add_release_cycle_and_channel(bug5)
+    assert bug5['release_channel'] == 'release'
+    assert bug5['release_cycle'] == 40
