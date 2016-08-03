@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import date, timedelta
-from update_bugs import (
+from bz2db.update_bugs import (
     add_release_cycle_and_channel,
     get_discovery_release_cycle,
     get_release_channel
