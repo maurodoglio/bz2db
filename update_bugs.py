@@ -158,6 +158,7 @@ def update_bug_db(bugs, cf_fields):
                       Column('status', String),
                       Column('severity', String),
                       Column('resolution', String),
+                      Column('dupe_of', Integer, nullable=True),
                       Column('product', String),
                       Column('platform', String),
                       Column('op_sys', String),
@@ -201,6 +202,7 @@ def main():
          'creator',
          'creation_time',
          'whiteboard',
+         'dupe_of',
      ] + cf_fields
 
     bug_params = {
