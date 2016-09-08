@@ -187,6 +187,14 @@ def update_bug_db(bugs, cf_fields):
 
     conn = engine.connect()
     conn.execute(bug_table.insert(), bugs)
+    # Add bug_order table
+    
+    conn.execute('DROP TABLE bug_order')
+    conn.execute('''
+    CREATE TABLE bug_order AS
+    SELECT id,
+           rank() OVER (PARTITION BY creator ORDER BY creation_time ASC)
+    FROM bug''')
 
 
 def main():
