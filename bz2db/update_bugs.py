@@ -217,7 +217,7 @@ def main():
             "Firefox%20for%20iOS",
             "Toolkit"
         ],
-        'creation_time': '2015-06-01',
+        'creation_time': '2015-04-01',
         'exclude_fields': ['cc', 'cc_detail', 'creator_detail'],
         'include_fields': include_fields,
         'bug_severity': [
